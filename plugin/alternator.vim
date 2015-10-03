@@ -21,6 +21,11 @@ let g:loaded_alternator = 1
 "   return expand("%")
 " endf
 
+function! s:git_root_path()
+  return system("cd " . expand('%:p:h') . "&& echo -n $(git rev-parse --show-toplevel)")
+endf
+
+
 " }}}
 
 " scenario 1 -
@@ -60,23 +65,47 @@ function! s:ruby_is_test()
 endf
 
 function! s:ruby_find_test()
+  echo s:ruby_root_test_file()
   if s:ruby_test_is_local()
-    exec ':e ' . s:ruby_local_test_name()
-    echo 'found file in same directory'
-  elseif filereadable('spec/' . test_file)
-    echo 'found file in relative spec file'
+    echo 'Found file in same directory'
+    exec ':e ' . s:ruby_local_test_file()
+  elseif s:ruby_test_is_relative()
+    echo 'Found file in relative spec file'
+    exec ':e ' . s:ruby_relative_test_file()
+  elseif s:ruby_test_is_root()
+    echo 'Found file in project root'
+    exec ':e ' . s:ruby_root_test_file()
   else
-    echo 'test file not found'
+    echo 'Test file not found'
   endif
 endf
 
 function! s:ruby_test_is_local()
-  return filereadable(s:ruby_local_test_name())
+  return filereadable(s:ruby_local_test_file())
 endf
 
-function! s:ruby_local_test_name()
+function! s:ruby_local_test_file()
   return substitute(expand('%'), '\.e\?rb$', '_spec.rb', '')
 endf
+
+function! s:ruby_test_is_relative()
+  return filereadable(s:ruby_relative_test_file())
+endf
+
+function! s:ruby_relative_test_file()
+  return expand('%:h') . '/spec/' . substitute(expand('%:t'), '\.e\?rb$', '_spec.rb', '')
+endf
+
+function! s:ruby_test_is_root()
+  return filereadable(s:ruby_root_test_file())
+endf
+
+function! s:ruby_root_test_file()
+  " include git_local_path function after spec/before filename
+  return s:git_root_path() . '/spec/' . substitute(expand('%:t'), '\.e\?rb$', '_spec.rb', '')
+endf
+
+
 
 function! s:ruby_switch_local()
   " is switching to test/target?
