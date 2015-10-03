@@ -35,7 +35,13 @@ function! Alternate()
   endif
 endf
 
-command! Alternate call Alternate()
+function! FocusOnFile()
+  tabnew %
+  normal! v
+  normal! l
+  call OpenTestAlternate()
+  normal! h
+endfunction
 
 function! s:search_ruby()
   " code
@@ -96,3 +102,6 @@ function! OpenApexTest()
 endfunction
 
 " }}}
+
+command! Alternate call Alternate()
+command! FocusOnFile call FocusOnFile()
