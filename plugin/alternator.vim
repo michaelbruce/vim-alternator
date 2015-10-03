@@ -35,9 +35,14 @@ endf
 "
 " scenario 2 - blackjack.rb
 " has spec/blackjack.rb relative to original file.
+"
+" scenario 3 - aggregator base.rb
+" lives in app/aggregator but spec is spec/aggregator not spec/app/aggregator
+" function to only use single level folder, not whole path from root?
 
 function! Alternate()
   if &filetype == 'ruby'
+    echo s:ruby_root_single_relative_test_file()
     call s:switch_ruby()
   else
     echo 'this is not ruby.'
@@ -54,9 +59,9 @@ endfunction
 
 function! s:switch_ruby()
   if s:ruby_is_test()
-    echo 'this is a test'
+    call s:ruby_switch_to_target()
   else
-    call s:ruby_find_test()
+    call s:ruby_switch_to_test()
   endif
 endf
 
@@ -64,17 +69,24 @@ function! s:ruby_is_test()
   return match(expand('%'), '_spec.rb') != -1
 endf
 
-function! s:ruby_find_test()
-  echo s:ruby_root_test_file()
+" Switch to test {{{
+
+function! s:ruby_switch_to_test()
   if s:ruby_test_is_local()
     echo 'Found file in same directory'
     exec ':e ' . s:ruby_local_test_file()
   elseif s:ruby_test_is_relative()
     echo 'Found file in relative spec file'
     exec ':e ' . s:ruby_relative_test_file()
-  elseif s:ruby_test_is_root()
-    echo 'Found file in project root'
-    exec ':e ' . s:ruby_root_test_file()
+  elseif s:ruby_test_is_root_local()
+    echo 'Found file in project root (local)'
+    exec ':e ' . s:ruby_root_local_test_file()
+  elseif s:ruby_test_is_root_relative()
+    echo 'Found file in project root (relative)'
+    exec ':e ' . s:ruby_root_relative_test_file()
+  elseif s:ruby_test_is_root_single_relative()
+    echo 'Found file in project root (single)'
+    exec ':e ' . s:ruby_root_single_relative_test_file()
   else
     echo 'Test file not found'
   endif
@@ -96,21 +108,54 @@ function! s:ruby_relative_test_file()
   return expand('%:h') . '/spec/' . substitute(expand('%:t'), '\.e\?rb$', '_spec.rb', '')
 endf
 
-function! s:ruby_test_is_root()
-  return filereadable(s:ruby_root_test_file())
+function! s:ruby_test_is_root_local()
+  return filereadable(s:ruby_root_local_test_file())
 endf
 
-function! s:ruby_root_test_file()
-  " include git_local_path function after spec/before filename
+function! s:ruby_root_local_test_file()
   return s:git_root_path() . '/spec/' . substitute(expand('%:t'), '\.e\?rb$', '_spec.rb', '')
 endf
 
-
-
-function! s:ruby_switch_local()
-  " is switching to test/target?
-  exec ':e '
+function! s:ruby_test_is_root_relative()
+  return filereadable(s:ruby_root_relative_test_file())
 endf
+
+function! s:ruby_root_relative_test_file()
+  let root = s:git_root_path()
+  let git_local_file_path = substitute(expand('%:p'), root, '', '')
+  return root . '/spec' . substitute(git_local_file_path, '\.e\?rb$', '_spec.rb', '')
+endf
+
+function! s:ruby_test_is_root_single_relative()
+  return filereadable(s:ruby_root_single_relative_test_file())
+endf
+
+function! s:ruby_root_single_relative_test_file()
+  let root = s:git_root_path()
+  let git_local_file_path = expand('%:h:t') . '/' . expand('%:t')
+  return root . '/spec/' . substitute(git_local_file_path, '\.e\?rb$', '_spec.rb', '')
+endf
+
+" }}}
+
+" Switch to target {{{
+
+function! s:ruby_switch_to_target()
+  " is test in spec folder?
+  if s:ruby_test_in_test_folder()
+    echo 'Test is in test folder'
+    " if git root, go there
+    " if not go relative
+  else
+    echo 'This is a test file'
+  endif
+endf
+
+function! s:ruby_test_in_test_folder()
+  return match(expand('%'), '/spec/') != -1
+endf
+
+" }}}
 
 function! s:wip_switch_ruby()
   echo 'switching to test'
