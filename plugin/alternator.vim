@@ -42,7 +42,6 @@ endf
 
 function! Alternate()
   if &filetype == 'ruby'
-    echo s:ruby_root_single_relative_test_file()
     call s:switch_ruby()
   else
     echo 'this is not ruby.'
