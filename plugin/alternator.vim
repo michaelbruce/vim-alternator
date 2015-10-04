@@ -26,6 +26,10 @@ function! s:git_root_path()
 endf
 
 
+function! s:local_file_path()
+  return expand('%:h:t') . '/' . expand('%:t')
+endf
+
 " }}}
 
 " scenario 1 -
@@ -130,9 +134,7 @@ function! s:ruby_test_is_root_single_relative()
 endf
 
 function! s:ruby_root_single_relative_test_file()
-  let root = s:git_root_path()
-  let git_local_file_path = expand('%:h:t') . '/' . expand('%:t')
-  return root . '/spec/' . substitute(git_local_file_path, '\.e\?rb$', '_spec.rb', '')
+  return s:git_root_path() . '/spec/' . substitute(s:local_file_path(), '\.e\?rb$', '_spec.rb', '')
 endf
 
 " }}}
@@ -150,6 +152,20 @@ function! s:ruby_switch_to_target()
   endif
 endf
 
+function! s:ruby_target_is_root_relative()
+  " e.g y/x/target.rb from spec/y/x/test.rb
+  " code
+endf
+
+function! s:ruby_root_single_relative_target_file()
+  return s:git_root_path() . '/' . substitute(s:local_file_path(), '_spec.rb', '', '')
+endf
+
+" function! s:ruby_is_test_folder_relative()
+"   echo 'hiii'
+" endf
+
+" a.k.a is target relative?
 function! s:ruby_test_in_test_folder()
   return match(expand('%'), '/spec/') != -1
 endf
