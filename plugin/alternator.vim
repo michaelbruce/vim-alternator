@@ -13,7 +13,7 @@ let g:loaded_alternator = 1
 " TODO workout if you are in a test file or not
 " TODO abstract this between languages
 " TODO handling same name switches?
-" TODO prompt to create file if doesn't exist
+" TODO prompt to create file if doesn't exist - http://vim.wikia.com/wiki/User_input_from_a_script
 
 " helper functions {{{
 
