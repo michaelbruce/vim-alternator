@@ -17,9 +17,9 @@ let g:loaded_alternator = 1
 
 " helper functions {{{
 
-" function! s:current_file()
-"   return expand("%")
-" endf
+function! s:current_file()
+  return expand("%")
+endf
 
 function! s:git_root_path()
   return system("cd " . expand('%:p:h') . "&& echo -n $(git rev-parse --show-toplevel)")
@@ -47,6 +47,8 @@ endf
 function! Alternate()
   if &filetype == 'ruby'
     call s:switch_ruby()
+  elseif &filetype == 'java'
+    call s:switch_java()
   else
     echo 'this is not ruby.'
   endif
@@ -211,6 +213,22 @@ function! MatchClassTest()
     let new_file = substitute(current_file, '.cls', 'Test\.cls', '')
   endif
   return new_file
+endfunction
+
+" }}}
+
+" Java {{{
+
+function! s:switch_java()
+  let current_file = expand("%")
+  if match(current_file, "Test") >= 0
+    let new_file = substitute(current_file, 'Test\.java', '\.java', '')
+    let new_file = substitute(new_file, 'test/', 'main/', '')
+  else
+    let new_file = substitute(current_file, '\.java', 'Test\.java', '')
+    let new_file = substitute(new_file, 'main/', 'test/', '')
+  endif
+  exec ':e ' . new_file
 endfunction
 
 " }}}
