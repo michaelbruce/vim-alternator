@@ -223,10 +223,10 @@ function! s:switch_java()
   let current_file = expand("%")
   if match(current_file, "Test") >= 0
     let new_file = substitute(current_file, 'Test\.java', '\.java', '')
-    let new_file = substitute(new_file, 'test/', 'main/', '')
+    let new_file = substitute(new_file, '/test/', '/main/', '')
   else
     let new_file = substitute(current_file, '\.java', 'Test\.java', '')
-    let new_file = substitute(new_file, 'main/', 'test/', '')
+    let new_file = substitute(new_file, '/main/', '/test/', '')
   endif
   exec ':e ' . new_file
 endfunction
