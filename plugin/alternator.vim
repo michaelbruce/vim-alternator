@@ -3,9 +3,9 @@
 " Version:      0.1
 " " map <Leader>5 :unlet g:loaded_alternator<CR>:so %<CR>:echo 'Reloaded!'<CR>
 
-" if exists('g:loaded_alternator')
-"   finish
-" endif
+if exists('g:loaded_alternator')
+  finish
+endif
 
 let g:loaded_alternator = 1
 
@@ -49,6 +49,8 @@ function! Alternate()
     call s:switch_ruby()
   elseif &filetype == 'java'
     call s:switch_java()
+  elseif &filetype == 'clojure'
+    call s:switch_clojure()
   else
     echo 'this is not ruby.'
   endif
@@ -223,10 +225,26 @@ function! s:switch_java()
   let current_file = expand("%")
   if match(current_file, "Test") >= 0
     let new_file = substitute(current_file, 'Test\.java', '\.java', '')
-    let new_file = substitute(new_file, '/test/', '/main/', '')
+    let new_file = substitute(new_file, 'test/', 'main/', '')
   else
     let new_file = substitute(current_file, '\.java', 'Test\.java', '')
-    let new_file = substitute(new_file, '/main/', '/test/', '')
+    let new_file = substitute(new_file, 'main/', 'test/', '')
+  endif
+  exec ':e ' . new_file
+endfunction
+
+" }}}
+
+" Clojure {{{
+
+function! s:switch_clojure()
+  let current_file = expand("%")
+  if match(current_file, "Test") >= 0
+    let new_file = substitute(current_file, '_test\.clj', '\.clj', '')
+    let new_file = substitute(new_file, 'test/', 'src/', '')
+  else
+    let new_file = substitute(current_file, '\.clj', '_test\.clj', '')
+    let new_file = substitute(new_file, 'src/', 'test/', '')
   endif
   exec ':e ' . new_file
 endfunction
