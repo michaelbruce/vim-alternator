@@ -309,6 +309,7 @@ function! Test(...)
         call RunTestFile()
     end
 endfunction
+command! Test call Test()
 
 function! RunTestFile(...)
     if a:0
