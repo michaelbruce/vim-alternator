@@ -81,10 +81,10 @@ endf
 
 function! s:ruby_switch_to_test()
    " TODO top conditional should be extracted to a var and included/exlucded in ?rb$ regex
-   if !(expand('%') =~ "*\.rb$")
-     echo 'File is script, switching to local spec'
-     exec ':e ' . expand('%') . '_spec.rb'
-  elseif s:ruby_test_is_local()
+   " if !(expand('%') =~ "*\.rb$")
+   "   echo 'File is script, switching to local spec'
+   "   exec ':e ' . expand('%') . '_spec.rb'
+  if s:ruby_test_is_local()
     echo 'Found file in same directory'
     exec ':e ' . s:ruby_local_test_file()
   elseif s:ruby_test_is_relative()
