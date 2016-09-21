@@ -307,7 +307,7 @@ call MapCR()
 
 function! Test(...)
     if &filetype == 'clojure'
-        exec ":!lein test"
+        exec ":RunTests"
     elseif &filetype == 'vader'
         exec ":Vader"
     else
