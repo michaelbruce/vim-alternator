@@ -309,7 +309,8 @@ function! Test(...)
     if &filetype == 'clojure'
         exec ":RunTests"
     elseif &filetype == 'vader'
-        exec ":Vader"
+        " exec ":Vader"
+        exec ":Vader test/alltests.vader"
     else
         call RunTestFile()
     end
