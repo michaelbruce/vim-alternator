@@ -306,14 +306,16 @@ endfunction
 call MapCR()
 
 function! Test(...)
-    if &filetype == 'clojure'
-        exec ":RunTests"
-    elseif &filetype == 'vader'
-        " exec ":Vader"
-        exec ":Vader test/alltests.vader"
-    else
-        call RunTestFile()
-    end
+  if &filetype == 'clojure'
+    exec ":RunTests"
+  elseif &filetype == 'r'
+    call RunTests('hello.R')
+  elseif &filetype == 'vader'
+    " exec ":Vader"
+    exec ":Vader test/alltests.vader"
+  else
+    call RunTestFile()
+  end
 endfunction
 command! Test call Test()
 
@@ -345,37 +347,39 @@ function! SetTestFile(command_suffix)
 endfunction
 
 function! RunTests(filename)
-    " Write the file and run tests for the given filename
-    if expand("%") != ""
-      :w
-    end
-    if match(a:filename, '\.feature$') != -1
-        exec ":!script/features " . a:filename
-    else
-        " First choice: project-specific test script
-        if filereadable("script/test")
-            exec ":!script/test " . a:filename
-        " Fall back to the .test-commands pipe if available, assuming someone
-        " is reading the other side and running the commands
-        elseif filewritable(".test-commands")
-          let cmd = 'rspec --color --format d'
-          exec ":!echo " . cmd . " " . a:filename . " > .test-commands"
+  " Write the file and run tests for the given filename
+  if expand("%") != ""
+    :w
+  end
+  if match(a:filename, '\.feature$') != -1
+    exec ":!script/features " . a:filename
+  elseif match(a:filename, '\.R$') != -1
+    exec "!r --no-save < runtests.R"
+  else
+    " First choice: project-specific test script
+    if filereadable("script/test")
+      exec ":!script/test " . a:filename
+      " Fall back to the .test-commands pipe if available, assuming someone
+      " is reading the other side and running the commands
+    elseif filewritable(".test-commands")
+      let cmd = 'rspec --color --format d'
+      exec ":!echo " . cmd . " " . a:filename . " > .test-commands"
 
-          " Write an empty string to block until the command completes
-          sleep 100m " milliseconds
-          :!echo > .test-commands
-          redraw!
-        " Fall back to a blocking test run with Bundler
-        elseif filereadable("Gemfile")
-            exec ":!bundle exec rspec --color --format d " . a:filename
-        " If we see python-looking tests, assume they should be run with Nose
-        elseif strlen(glob("test/**/*.py") . glob("tests/**/*.py"))
-            exec "!nosetests " . a:filename
-        elseif strlen(glob("test/**/*_test.sh$") . glob("tests/**/*._test.sh$"))
-            exec "!bash " . a:filename
-        " Fall back to a normal blocking test run
-        else
-            exec ":!rspec --color " . a:filename
-        end
+      " Write an empty string to block until the command completes
+      sleep 100m " milliseconds
+      :!echo > .test-commands
+      redraw!
+      " Fall back to a blocking test run with Bundler
+    elseif filereadable("Gemfile")
+      exec ":!bundle exec rspec --color --format d " . a:filename
+      " If we see python-looking tests, assume they should be run with Nose
+    elseif strlen(glob("test/**/*.py") . glob("tests/**/*.py"))
+      exec "!nosetests " . a:filename
+    elseif strlen(glob("test/**/*_test.sh$") . glob("tests/**/*._test.sh$"))
+      exec "!bash " . a:filename
+      " Fall back to a normal blocking test run
+    else
+      exec ":!rspec --color " . a:filename
     end
+  end
 endfunction
